@@ -1,0 +1,313 @@
+{
+  "name": "Telegram AI chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -256
+      ],
+      "id": "6b2a65e2-0647-42f1-a99d-70dbe0da234d",
+      "name": "Telegram Trigger",
+      "webhookId": "eb83397f-e370-474a-8c7c-f4cbd2fb006a",
+      "credentials": {
+        "telegramApi": {
+          "id": "Jkkzx1rBflC7pJyw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "replyMarkup": "=none",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        -224
+      ],
+      "id": "b19bd986-9ac4-4788-9f75-3457cd31b379",
+      "name": "Send a text message",
+      "webhookId": "631a0735-53fe-4a18-af3f-e6c826377479",
+      "credentials": {
+        "telegramApi": {
+          "id": "Jkkzx1rBflC7pJyw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "=json",
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Você é a Sofia, atendente da Clínica Belle. Seja breve e natural — responda em 2-3 frases no máximo. Não repita saudações. Vá direto ao ponto. Serviços: limpeza de pele R$150, botox R$350, preenchimento R$400. Horários: seg-sab 9h-18h. WhatsApp para agendamento: (11) 99999-9999.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $('Telegram Trigger').first().json.message.text }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "66ea94ed-512d-4943-814c-72bbc4b457ee",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NNh50R9COQaKpoAa",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4",
+          "mode": "list",
+          "cachedResultName": "Chatbot Memory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+            "role": "User",
+            "content ": "={{ $('Telegram Trigger').first().json.message.text }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content ",
+              "displayName": "content ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        16
+      ],
+      "id": "67e69f8c-7fb6-4101-a62c-3503e29e8df9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tu7p5dA50Q0vrBmU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4",
+          "mode": "list",
+          "cachedResultName": "Chatbot Memory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wS9CulL6_7F3jjNF_zq9zoWJEgnOGASiiBczctwBQf4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+            "content ": "={{ $('HTTP Request').first().json.choices[0].message.content }}",
+            "role": "assistant",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content ",
+              "displayName": "content ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        16
+      ],
+      "id": "8a2787e2-b26f-498d-acac-c3808a53fe15",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tu7p5dA50Q0vrBmU",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "71d5323f-1fc0-46b0-93e5-dbe63635c3a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fe33314e6b0248ff1c87df6b3df5fcb400f718d549f532133e5f8fd8652bc498"
+  },
+  "id": "GX5mKkspsl6AD8g5",
+  "tags": []
+}
